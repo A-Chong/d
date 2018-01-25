@@ -1,5 +1,6 @@
 %%
-% Reads .TextGrids as the result from handsegmentation, and turns them 
+% Reads .TextGrids as the result from handsegmentation, checks with 
+% dictionary that all words are spelled correctly, and turns the .TextGrids 
 % into a format expected by FAVE.
 %
 % IMPORTANT: Does not need input arguments, but do pay attention to input 
@@ -56,7 +57,27 @@ for file = 1:length(origin_dir)
         TextGrid(file).read(4) = Gwrd;
         
         TextGrid(file).read(5:end) = [];
-
+        
+        % Dictionary check
+        for role = [2,4]
+            words  = TextGrid(file).read(role).INT;
+            phones = TextGrid(file).read(role-1).INT;
+            
+            for w = [1:length(words)];
+                index_t0 = find([phones.xmin] == words(w).xmin);
+                index_t1 = find([phones.xmin] == words(w).xmax);
+                                
+                word = words(w).text;
+                phone = [phones(index_t0:index_t1-1).text];
+                
+                match = dictionary(word, phone);
+                if strcmp(match, 'correct') == 'False';
+                    fprintf('word');
+                    fprintf('origin_dir(file).name(1:15)');                      
+                end;                                    
+            end;
+        end;
+        
         % Adapt to FAVE format each of the relevant tiers
         for tier = 1:4
             a = TextGrid(file).read(tier).INT;
