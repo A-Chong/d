@@ -1,0 +1,13 @@
+# Ignore everything
+/*
+
+# But not these files...
+!.gitignore
+!code_part_1
+!master.docx
+# etc...
+
+# ...even if they are in subdirectories
+#!*/
+
+# https://stackoverflow.com/questions/987142/make-gitignore-ignore-everything-except-a-few-files
