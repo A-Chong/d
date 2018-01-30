@@ -11,10 +11,10 @@ t_counter = 1; % index counter for adding individual tables to struct
                 % containing all individual tables with giver and receiver 
                 % roles. Needed above loop over giver and receiver
 
-for role = {'giver', 'receiver'}
+for rol = {'giver', 'receiver'}
 
 file_path = ['/Users/amui/Dropbox/d/FAVE-extract_Toolkit/output_files_' ...
-    role{1} '/'];
+    rol{1} '/'];
 
 files = dir([file_path output_type{1}]);
 
@@ -35,7 +35,7 @@ files = dir([file_path output_type{1}]);
     T(:,index) = [];
 
     % Create identification variables, 
-    rol = repmat(role{1}(1), height(T),1);
+    role = repmat(rol{1}(1), height(T),1);
 
         % Other identification variables, retrieve info from name of file
         ro = str2num(files(f).name(10:12));  % round
@@ -48,14 +48,17 @@ files = dir([file_path output_type{1}]);
 
         % Other identification variables, retrieve info from game_data.mat
         tab = GAME(GAME.round == ro & GAME.team == te,:);            
-        pla = tab.(['pcode_' role{1}(1)]){1};  % subject
+        pla = tab.(['pcode_' rol{1}(1)]){1};  % subject
         player = repmat(pla, height(T),1);
         if we == 1; da = tab.block; else; da = tab.block + 5; end; % day
         day = repmat(da, height(T),1);
-            
+        
+    % Create phrase and word annotation variables
+    [word_note, phrase_note] = grid_annotations(files(f).name(1:15),T,role(1));
 
-    T = [table(round) table(team) table(player) table(rol) ...
-        table(day) table(week) table(exp) T];
+    T = [table(round) table(team) table(player) table(role) ...
+        table(day) table(week) table(exp) ...
+        table(word_note) table(phrase_note) T];
 
     % Add to master struct
     results(t_counter).table = T;
