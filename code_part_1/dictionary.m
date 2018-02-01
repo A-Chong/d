@@ -1,8 +1,22 @@
 %% Copy of i_3_grid_sanity_check_phones_in_word(word, phones, varargin)
 
+% Ignores case by converting everybody to lower case.
+%
+% INPUT:
+%       word: string, the word for the entries
+%       phones: string of concatenated phones, or cell array with phones.
+
 %%
 function[match] = dictionary(word, phones, varargin)
 
+%% Case conversion
+phones = lower(phones);
+word = lower(word);
+
+%% Cell array concatenation
+if iscell(phones); phones = horzcat(phones{:}); end;    
+
+%% Body of dictionary
 
 if length(varargin) > 0;
     wrd = varargin{1}; end;
