@@ -18,7 +18,7 @@ function[T] = add_non_vows(filename,T,role)
         % Given vowel table T has time rounded to 3 decimals, in order to
         % facilitate comparison, round to 3 decimals table from
         % handsegmented .TextGrid
-        % See explanation for embedded rounding in commit:
+        % See explanation for embedded rounding in commit: 2e8be16
         [xmin,xmax,text]=deal(round(round(round([gr(r).INT.xmin],5),4),3)',...
                               round(round(round([gr(r).INT.xmax],5),4),3)',...
                               {gr(r).INT.text}');

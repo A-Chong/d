@@ -14,8 +14,10 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     
     % Rounding of xmin and xmax to 3 decimal points necessary to be
     % compatible with T. This is a result of FAVE, which rounds to 3.
+    % See explanation for embedded rounding in commit: 2e8be16
     words = struct2table(gr(wrd_tier).INT);
-    [words.xmin,words.xmax] = deal(round(words.xmin,3),round(words.xmax,3));
+    [words.xmin,words.xmax] = deal(round(round(round(words.xmin,5),4),3),...
+                                   round(round(round(words.xmax,5),4),3));
 
 
     %% Getting word annotations
@@ -65,6 +67,7 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
         
         % Sanity check that the word from .TextGrid and from T are the same
         test = unique(T.word(indices));
+        display(i);
         if ~strcmp(test{1}, words.text{i}); msgbox('Diff wrd','Error');end;
     end;    
 
