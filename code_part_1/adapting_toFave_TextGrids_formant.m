@@ -1,7 +1,20 @@
 %%
-% Reads .TextGrids as the result from handsegmentation, checks with 
+% Reads .TextGrids as the result from hand segmentation, checks with 
 % dictionary that all words are spelled correctly, and turns the .TextGrids 
 % into a format expected by FAVE.
+%
+% The handsegmented non FAVE files are treated first. Time boundaries need
+% to be rounded to 3 decimals and here is the reason: the inherited code 
+% (write_praat_textgrid.m) for writing the FAVE formatted grids will round 
+% them to 4, which can cause problems later when comparing the originals to 
+% the FAVE results, since FAVE rounds to 3.
+% Example, the boundary: 
+%  123.967494 in original handsegmented file round_01_002_2
+%  123.9675   as saved in FAVE formatted .TextGrid, for FAVE input
+%  123.9680   as presented in FAVE output reading (rounds to 3 it's input)
+%  123.9670   if am I to round to 3 the original handsegmented file 
+% Solution:
+%  Round to 3 in original handsegmented file so that it's 123.9670 for all
 %
 % IMPORTANT: Does not need input arguments, but do pay attention to input 
 % and output folders.
@@ -37,6 +50,34 @@ mkdir([folder 'FAVE_formatted/'], ['FAVE_giver/']);
 output_folders = containers.Map;
 output_folders('r') = [folder 'FAVE_formatted/FAVE_rcver/'];
 output_folders('g') = [folder 'FAVE_formatted/FAVE_giver/'];
+
+%% Rounding to 3 decimals and saving the original handsegmented .TextGrids
+
+for file = 1:length(origin_dir)
+    % Read the individual .TextGrid file
+    Grid(file).read = ST_read_praat_textgrid([path origin_dir(file).name])
+    
+    % Ignore cases like TexGrid(212) because file 117 is corrupt
+    if length(Grid(file).read) > 1; 
+        
+        % Loop over each existing tier and round it's timepoints
+        for tier = 1:length(Grid(file).read)
+            % Provided it isn't empty (word|phrase annotations tiers could)
+            if ~(isempty(Grid(file).read(tier).INT) | ...
+                    length(Grid(file).read(tier).INT) == 1);
+                tab = struct2table(Grid(file).read(tier).INT);
+                if ismember('xmin',tab.Properties.VariableNames)
+                    [tab.xmin,tab.xmax]= deal(round(tab.xmin,3),...
+                                               round(tab.xmax,3));
+                else; % For timepoint tier, has time instead of xmin and xmax
+                    tab.time = round(tab.time,3); 
+                end;
+                Grid(file).read(tier).INT = table2struct(tab);
+            end;
+        end;
+        ST_write_praat_textgrid(Grid(file).read,[path origin_dir(file).name]);
+    end;
+end;
 
 %% Main body
 %  Read each .TextGrid file, get main 4 tiers, adapt annotations to the 
