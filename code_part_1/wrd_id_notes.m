@@ -30,28 +30,35 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     % Initialize column of word annotations in "words" table as {[]}
     words.word_annotations = repmat({[]}, height(words),1);
     words.word_annotations_2 = repmat({[]}, height(words),1);
-    % List of word annotations texts with their time points, from grid file
-    wrd_notes = {gr(wrd_note_tier).INT.mark};
-    % Loop over the list word annotations, and match the time of each to
-    % the corresponding row according to time in table "words".
-    for n = 1:length(wrd_notes);
-        % Check whether it's an annotation for the present role
-        if strcmp(wrd_notes{n}(end), role);
-            % Determine the corresponding index in 'words' depeding on time
-            note_time = gr(wrd_note_tier).INT(n).time;
-            in =find(words.xmin <= note_time & words.xmax >= note_time);
-            % Save the annonation text in the relevant column
-            if isempty(words.word_annotations{in});
-                words.word_annotations(in) = {wrd_notes{n}(1:end-2)};
-            elseif isempty(words.word_annotations_2{in});
-                words.word_annotations_2(in) = {wrd_notes{n}(1:end-2)};
-            else;
-                msgbox(['There are > 2 annotations for word ' ...
-                    words.text{in} ' in ' filename 'rg  at' ...
-                    num2str(words.xmin(in))],'Problem');
+    
+    % If there are word notes -- there are none in some files 
+    if ~(isempty(gr(wrd_note_tier).INT))
+        
+        % List of word annotations texts with their time points
+        wrd_notes = {gr(wrd_note_tier).INT.mark};
+        
+        % Loop over the list word annotations, and match the time of each 
+        %to the corresponding row according to time in table "words".
+        for n = 1:length(wrd_notes);
+            % Check whether it's an annotation for the present role
+            if strcmp(wrd_notes{n}(end), role);
+                % Determine the corresponding index in 'words' depeding on 
+                % time
+                note_time = gr(wrd_note_tier).INT(n).time;
+                in =find(words.xmin<= note_time & words.xmax >= note_time);
+                % Save the annonation text in the relevant column
+                if isempty(words.word_annotations{in});
+                    words.word_annotations(in) = {wrd_notes{n}(1:end-2)};
+                elseif isempty(words.word_annotations_2{in});
+                    words.word_annotations_2(in) = {wrd_notes{n}(1:end-2)};
+                else;
+                    msgbox(['There are > 2 annotations for word ' ...
+                        words.text{in} ' in ' filename 'rg  at' ...
+                        num2str(words.xmin(in))],'Problem');
+                end;
             end;
         end;
-    end;        
+    end;
  
     %% Adding wrd_id column and updating wrd_id output, adding annotations
     
