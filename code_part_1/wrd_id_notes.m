@@ -86,6 +86,7 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     %% Finish catch .TextGrid files that may have "notes" tier missing
     else; % if ~isempty(wrd_note_tier);
         msgbox(['There is no notes tier:  ' filename 'rg'],'Error');
+        display(['There is no word notes tier (5) in: ' filename]);
     end;  
 end
 

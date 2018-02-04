@@ -1,4 +1,8 @@
 %% Puts the content of FAVE output files into a Matlab table.
+% Creates the final format of usable table, with variables:
+%
+% TO DO: finish writing comments and docummentation of all scripts used in
+% code_part_1
 
 warning('off','all');
 load('/Users/amui/Dropbox/d/tables_generated_by_Sam/game_data.mat');
@@ -6,15 +10,18 @@ load('/Users/amui/Dropbox/d/tables_generated_by_Sam/game_data.mat');
 %% Process for both raw values and normalized
 for output_type = {'*.output.txt', '*.output_norm.txt'}
     
-%% Folders containing FAVE output reads, both GIVER and RECEIVER
+%% Counters
 t_counter = 1; % index counter for adding individual tables to struct 
                 % containing all individual tables with giver and receiver 
                 % roles. Needed above loop over giver and receiver
+[wrd_id, phr_id] = deal(1); % initial value of variables wrd_id, phr_id, 
+                % which are updated in call to function in wrd_phr_id.m                 
 
-for role = {'giver', 'receiver'}
+%% Folders containing FAVE output reads, both GIVER and RECEIVER
+for rol = {'giver', 'receiver'}
 
 file_path = ['/Users/amui/Dropbox/d/FAVE-extract_Toolkit/output_files_' ...
-    role{1} '/'];
+    rol{1} '/'];
 
 files = dir([file_path output_type{1}]);
 
@@ -26,6 +33,8 @@ files = dir([file_path output_type{1}]);
     filename = [file_path files(f).name];
     T = readtable(filename,'Delimiter','\t','HeaderLines',1,...
         'ReadVariableNames', true);
+    % Cases in which output from FAVE is an empty table, corrupted files of
+    % da
 
     T(:,end) = []; % Last column is "", result from FAVE unnecessary
 
@@ -33,9 +42,13 @@ files = dir([file_path output_type{1}]);
     % have NaNs and others have strings
     index = find(strcmp(T.Properties.VariableNames,'glide'));
     T(:,index) = [];
+    
+    % Add all other phones that are not vowels and fills word column
+    % appropriately
+    T = add_non_vows(files(f).name(1:15),T,rol{1}(1));
 
     % Create identification variables, 
-    rol = repmat(role{1}(1), height(T),1);
+    role = repmat(rol{1}(1), height(T),1);
 
         % Other identification variables, retrieve info from name of file
         ro = str2num(files(f).name(10:12));  % round
@@ -48,15 +61,36 @@ files = dir([file_path output_type{1}]);
 
         % Other identification variables, retrieve info from game_data.mat
         tab = GAME(GAME.round == ro & GAME.team == te,:);            
-        pla = tab.(['pcode_' role{1}(1)]){1};  % subject
+        pla = tab.(['pcode_' rol{1}(1)]){1};  % subject
         player = repmat(pla, height(T),1);
         if we == 1; da = tab.block; else; da = tab.block + 5; end; % day
         day = repmat(da, height(T),1);
-            
-
-    T = [table(round) table(team) table(player) table(rol) ...
+        
+    % Create wrd_id and phr_id variables, unique identifiers for each word
+    % and phrase
+    [T,wrd_id] = wrd_id_notes(files(f).name(1:15),T,role(1),wrd_id); 
+    [T,phr_id] = phr_id_notes(files(f).name(1:15),T,role(1),phr_id);
+    
+    % Add new variables to T
+    T = [table(round) table(team) table(player) table(role) ...
         table(day) table(week) table(exp) T];
 
+    % Change column names
+    T.Properties.VariableNames(find(strcmp(T.Properties.VariableNames,...
+        'beg'))) = {'t0'};
+    T.Properties.VariableNames(find(strcmp(T.Properties.VariableNames,...
+        'xEnd'))) = {'t1'};
+    T.Properties.VariableNames(find(strcmp(T.Properties.VariableNames,...
+        'vowel'))) = {'PHN'};
+    T.Properties.VariableNames(find(strcmp(T.Properties.VariableNames,...
+        'stress'))) = {'is_vowel'};    
+
+    % Remove unnecessary variables
+    indices_cols_remove = find(ismember(T.Properties.VariableNames,...
+        {'B1', 'B2', 'B3','t','cd', 'fm','fp','fv','ps','fs', ...
+        'style','nFormants'}));
+    T(:,indices_cols_remove) = [];
+    
     % Add to master struct
     results(t_counter).table = T;
     results(t_counter).name = files(f).name;
@@ -82,7 +116,7 @@ end;
 
     % Create identification variable vow_id
     vow_id = linspace(1,height(VOW), height(VOW))';
-    T = [table(vow_id) T];
+    VOW = [table(vow_id) VOW];
 
 %% Saving table
 
