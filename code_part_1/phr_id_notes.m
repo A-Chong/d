@@ -13,10 +13,8 @@ function[T, phr_id] = phr_id_notes(filename, T,role,phr_id)
     % Index of the correct tier, in case they're in different orders in
     % different .TextGrids.   Pop-up error if word notes tier is missing.
     phr_tier = find(strcmp({gr(:).name}, 'phrase_comments'));
-    if isempty(phr_tier); 
-        msgbox(['There is no phrase_comments tier: ' filename 'rg'],...
-            'Error');
-    end;
+    if ~isempty(phr_tier); 
+
     % Table with phrase comments texts, xmin, and xmax, from grid file
     phrases = struct2table(gr(phr_tier).INT);
     
@@ -32,6 +30,12 @@ function[T, phr_id] = phr_id_notes(filename, T,role,phr_id)
         T.phr_comment(indices) = phrases.text(i);
     end;
 
+    %% Catch if phrase_comments tier is missing 
+    else;
+        msgbox(['There is no phrase_comments tier: ' filename 'rg'],...
+            'Error');
+        display(['There is no phrase_comments tier: ' filename]);
+    end; % if ~isempty(phr_tier);
 %% Output
 phr_id = phr_id;
 T = T;
