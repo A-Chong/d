@@ -24,8 +24,9 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     % Index of the correct tier, in case they're in different orders in
     % different .TextGrids.   Pop-up error if word notes tier is missing.
     wrd_note_tier = find(strcmp({gr(:).name}, 'notes'));
-    if isempty(wrd_note_tier); 
-        msgbox(['There is no notes tier:  ' filename 'rg'],'Error'); end;
+    
+    % Catch .TextGrid files that may have "notes" tier missing
+    if ~isempty(wrd_note_tier);
     
     % Initialize column of word annotations in "words" table as {[]}
     words.word_annotations = repmat({[]}, height(words),1);
@@ -81,6 +82,10 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
         else; %if ~isempty(indices);
             display(['word not added: ' words.text{i}]); end;
     end;
-
+    
+    %% Finish catch .TextGrid files that may have "notes" tier missing
+    else; % if ~isempty(wrd_note_tier);
+        msgbox(['There is no notes tier:  ' filename 'rg'],'Error');
+    end;  
 end
 
