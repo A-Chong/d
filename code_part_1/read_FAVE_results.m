@@ -128,6 +128,8 @@ table_name = regexp(files(1).name,'\.[a-z_]+\.', 'match');
 if regexp(table_name{1},'norm'); table_name='_norm'; else; table_name=''; end; 
 
 save(['/Users/amui/Dropbox/d/tables/VOW' table_name '.mat'], 'VOW');
+writetable(VOW,['/Users/amui/Dropbox/d/tables/VOW' table_name '.csv'],...
+    'Delimiter',','); 
 
 end;
 
