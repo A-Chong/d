@@ -120,16 +120,31 @@ end;
     % Create identification variable vow_id
     vow_id = linspace(1,height(VOW), height(VOW))';
     VOW = [table(vow_id) VOW];
+    
+%% VOW and ALL tables
+% In reality, the table so far contains "all" phones so it should be called 
+% 'ALL', and this is important as it becomes the reference table.
+% For ease of analysis, it is better to save a table that contains only
+% vowels, more apt to the name 'VOW'.
 
-%% Saving table
+ALL = VOW;
+VOW = ALL(ALL.is_vowel == 1,:);
+
+
+%% Saving tables
 
 % Name table depending on whether it's files_norm or files_raw
 table_name = regexp(files(1).name,'\.[a-z_]+\.', 'match');
 if regexp(table_name{1},'norm'); table_name='_norm'; else; table_name=''; end; 
 
+save(['/Users/amui/Dropbox/d/tables/ALL' table_name '.mat'], 'ALL');
+writetable(ALL,['/Users/amui/Dropbox/d/tables/ALL' table_name '.csv'],...
+    'Delimiter',','); 
+
 save(['/Users/amui/Dropbox/d/tables/VOW' table_name '.mat'], 'VOW');
 writetable(VOW,['/Users/amui/Dropbox/d/tables/VOW' table_name '.csv'],...
     'Delimiter',','); 
+
 
 end;
 

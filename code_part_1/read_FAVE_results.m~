@@ -33,8 +33,10 @@ files = dir([file_path output_type{1}]);
     filename = [file_path files(f).name];
     T = readtable(filename,'Delimiter','\t','HeaderLines',1,...
         'ReadVariableNames', true);
-    % Cases in which output from FAVE is an empty table, corrupted files of
-    % da
+    
+    % Leave out cases in which output from FAVE is an empty table. This 
+    % accommodates  the corrupted files of day 5 of team 1 experiment 1 .
+    if ~isempty(T);
 
     T(:,end) = []; % Last column is "", result from FAVE unnecessary
 
@@ -98,6 +100,7 @@ files = dir([file_path output_type{1}]);
     % Update counter
     t_counter = t_counter + 1;
     
+    end; %     if ~isempty(T);
     end; % for f = 1:length(files)
 
 %%
@@ -117,14 +120,24 @@ end;
     % Create identification variable vow_id
     vow_id = linspace(1,height(VOW), height(VOW))';
     VOW = [table(vow_id) VOW];
+    
+%% VOW and ALL tables
+% In reality, the table so far contains "all" phones, and this is important
+% as it becomes the main
 
-%% Saving table
+ALL = VOW;
+VOW = ALL(ALL.is_vowel == 1,:);
+
+
+%% Saving tables
 
 % Name table depending on whether it's files_norm or files_raw
 table_name = regexp(files(1).name,'\.[a-z_]+\.', 'match');
 if regexp(table_name{1},'norm'); table_name='_norm'; else; table_name=''; end; 
 
-save(['/Users/amui/Dropbox/d/tables/VOW' table_name '.mat'], 'VOW');
+save(['/Users/amui/Dropbox/d/tables/ALL' table_name '.mat'], 'ALL');
+writetable(ALL,['/Users/amui/Dropbox/d/tables/ALL' table_name '.csv'],...
+    'Delimiter',','); 
 
 end;
 
