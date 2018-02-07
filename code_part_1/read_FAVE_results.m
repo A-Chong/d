@@ -128,9 +128,12 @@ end;
 % vowels, more apt to the name 'VOW'.
 
 ALL = VOW;
+% Eliminating 5th day for subject A in experiment 1, damaged files
+if exp(1) == 1;
+    ALL(~(ALL.player == 'A' & ALL.day == 5),:);
+end;
+
 VOW = ALL(ALL.is_vowel == 1,:);
-
-
 %% Saving tables
 
 % Name table depending on whether it's files_norm or files_raw
