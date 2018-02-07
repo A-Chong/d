@@ -79,6 +79,34 @@ for file = 1:length(origin_dir)
     end;
 end;
 
+%% In case file does not have words notes and phrase_comments tiers,
+% especially relevant in the not yet handsegmented parts of exp 2
+
+for file = 1:length(origin_dir)
+    % Read the individual .TextGrid file
+    Grid(file).read = ST_read_praat_textgrid([path origin_dir(file).name]);
+    
+    % Ignore cases like TexGrid(212) because file 117 is corrupt
+    if length(Grid(file).read) > 1; 
+        
+        % Check for notes and phrase_comments tiers, correct as necessary
+        for m_tier = {'notes', 'phrase_comments'};
+            if ~ismember(m_tier{1},{Grid(file).read.name});
+                end_index = length(Grid(file).read);
+                Grid(file).read(end_index+1).name =m_tier{1};
+                Grid(file).read(end_index+1).xmin =Grid(file).read(1).xmin;
+                Grid(file).read(end_index+1).xmax =Grid(file).read(1).xmax;
+                Grid(file).read(end_index+1).intervals = 0;
+                if strcmp(m_tier{1}, 'notes'); class = 'TextTier';
+                else; class = 'IntervalTier'; end;
+                Grid(file).read(end_index+1).class = class;
+            end;
+        end;
+        ST_write_praat_textgrid(Grid(file).read,...
+            [path origin_dir(file).name]);
+    end; 
+end;
+
 %% Main body
 %  Read each .TextGrid file, get main 4 tiers, adapt annotations to the 
 %  style used by FAVE, and save output.
