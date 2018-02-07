@@ -32,7 +32,7 @@ function[T, phr_id] = phr_id_notes(filename, T,role,phr_id)
     end;
     
     %% Adding phrase_length column
-    T.phrase_length(:) = height(phrases);
+    T.phrase_length = deal(height(phrases));
 
     %% Catch if phrase_comments tier is missing 
     else;
