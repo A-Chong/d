@@ -84,10 +84,7 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     end;
 
     %% Adding word_order within phrase
-    content_words = {'blue','green','red', 'circle', 'triangle', 'star',...
-        'qeed', 'qeet', 'cad', 'cat', 'kvee', 'yvee', 'sbot', 'hicep',...
-        'back', 'big', 'down','filled', 'large', 'left', 'near', 'no',...
-        'right','small','sorry','unfilled','up','yes',};
+    content_words = {'blue','green','red', 'circle', 'triangle', };
     word_order = 1;
     for i = 1:height(words);
         
