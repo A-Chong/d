@@ -83,25 +83,77 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
             display(['word not added: ' words.text{i}]); end;
     end;
 
+    %% Word marked as laughter, needs to become a phrase marker 'laughter'
+    for i = 1:height(words);
+        
+        if ~isempty(words.word_annotations{i});
+        
+        % If word note is laughter
+        match = regexp(words.word_annotations{i},'laughter', 'match');
+        if ~isempty(match);
+        if strcmp(match{1},'laughter');
+            
+            % Retrieve phrase number and phrase indices, and mark
+            % phrase_comment for the whole phrase as laughter
+            wrd_index =find(T.beg >= words.xmin(i) & T.xEnd <= words.xmax(i));
+            phrase_num = T.phr_id(wrd_index);
+            indices = find(T.phr_id == unique(phrase_num));
+            
+                % Assign 'laughter' to phrase_comments only if there is no
+                % marking already in place, like 'misunderstanding'
+                if isempty(T.phr_comment{indices(1)});
+                T.phr_comment(indices) = {'laughter'}; end;
+        end;
+        end;
+        end;
+    end;
+    
     %% Adding word_order within phrase
     content_words = {'blue','green','red', 'circle', 'triangle', 'star',...
         'qeed', 'qeet', 'cad', 'cat', 'kvee', 'yvee', 'sbot', 'hicep',...
         'back', 'big', 'down','filled', 'large', 'left', 'near', 'no',...
         'right','small','sorry','unfilled','up','yes',};
-    word_order = 1;
-    for i = 1:height(words);
+    
+    phr_comment_tier = find(strcmp({gr(:).name}, 'phrase_comments'));
+    phrases = struct2table(gr(phr_comment_tier).INT);
+    
+    % Sanity check
+    if height(phrases) ~= length(unique(T.phr_id))-1; return; end;
+    
+    for ph = 1:height(phrases);
         
-        % Word order within phrase only for content words
-        if ismember(words.text{i}, content_words);
+        % Create subtable of the phrase
+        phr_words = words(words.xmin >= phrases.xmin(ph) & ...
+                          words.xmax <=phrases.xmax(ph),:);
         
-        indices = find(T.beg >= words.xmin(i) & T.xEnd <= words.xmax(i));
+        % Loop over each word of that phrase and assign number from 1 to
+        % end of the phrase
+        word_order = 1;
+        for wr = 1:height(phr_words);
+            if ismember(phr_words.text{wr},content_words);
+                
+                indices = find(T.beg >= phr_words.xmin(wr) & ...
+                               T.xEnd <= phr_words.xmax(wr));
         
-        % Assign wrd_id to T.wrd_id and update wrd_id
-        T.word_order(indices) = word_order;
-        word_order = word_order + 1;
-        
+            % Assign wrd_id to T.wrd_id and update wrd_id
+            T.word_order(indices) = word_order;
+            word_order = word_order + 1;
+            end;        
         end;
     end;
+    
+     %% Adding phrase_length column
+     % Get list of unique phr_id
+     phrs = unique(T.phr_id); phrs = phrs(phrs~=0);
+     % Loop over each phrase based on its phr_id
+     for j=1:length(phrs);
+         % Count number of unique words in this phrase -- discard words
+         % marked as zeros
+         wrds = T.word_order(T.phr_id == phrs(j)); wrds = wrds(wrds~=0);
+         % Assign sum of unique words to phrase_length column
+         indices = find(T.phr_id == phrs(j));
+         T.phrase_length(indices) = length(unique(wrds));
+     end;
     
     %% Finish catch .TextGrid files that may have "notes" tier missing
     else; % if ~isempty(wrd_note_tier);

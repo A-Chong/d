@@ -31,8 +31,6 @@ function[T, phr_id] = phr_id_notes(filename, T,role,phr_id)
         if i==height(phrases); T.phr_comment(indices)={'end'}; end;
     end;
     
-    %% Adding phrase_length column
-    T.phrase_length(:) = height(phrases);
 
     %% Catch if phrase_comments tier is missing 
     else;
