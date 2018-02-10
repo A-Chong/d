@@ -3,10 +3,11 @@
 
 
 %%
-function[T] = add_non_vows(filename,T,role)
+function[T] = add_non_vows(filename,T,role,e)
 
 
-    path = '/Users/amui/Dropbox/d/textgrids/grids_phrase_corrected_not_FAVE_ready/';
+    path = ['/Users/amui/Dropbox/' e ...
+        '/textgrids/grids_phrase_corrected_not_FAVE_ready/'];
     gr = ST_read_praat_textgrid([path filename 'rg.TextGrid']);
     
     %% Create table of handsegmented .TextGrid to compare to given vowel

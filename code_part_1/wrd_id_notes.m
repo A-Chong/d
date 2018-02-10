@@ -3,9 +3,10 @@
 
 
 %%
-function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
+function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id,e)
 
-    path = '/Users/amui/Dropbox/d/textgrids/grids_phrase_corrected_not_FAVE_ready/';
+    path = ['/Users/amui/Dropbox/' e ...
+        '/textgrids/grids_phrase_corrected_not_FAVE_ready/'];
     gr = ST_read_praat_textgrid([path filename 'rg.TextGrid']);
 
     % Handsegmented .TextGrid has both Gwrd and Rwrd, so get 
@@ -25,8 +26,8 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     % different .TextGrids.   Pop-up error if word notes tier is missing.
     wrd_note_tier = find(strcmp({gr(:).name}, 'notes'));
     
-    % Catch .TextGrid files that may have "notes" tier missing
-    if ~isempty(wrd_note_tier);
+    % If word notes tier is not missing, catch if it is
+    if ~isempty(wrd_note_tier);         
     
     % Initialize column of word annotations in "words" table as {[]}
     words.word_annotations = repmat({[]}, height(words),1);
@@ -60,9 +61,9 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
             end;
         end;
     end;
- 
     %% Adding wrd_id column and updating wrd_id output, adding annotations
-    
+
+        
     for i = 1:height(words);
         indices = find(T.beg >= words.xmin(i) & T.xEnd <= words.xmax(i));
         if ~isempty(indices);  % Problem with FAVE inconsistent rounding,
@@ -84,6 +85,8 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     end;
 
     %% Word marked as laughter, needs to become a phrase marker 'laughter'
+    % Do this only for the 'giver' files
+    if role == 'g';
     for i = 1:height(words);
         
         if ~isempty(words.word_annotations{i});
@@ -107,8 +110,14 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
         end;
         end;
     end;
+    end;
     
     %% Adding word_order within phrase
+    T.word_order = repmat(0, height(T),1);
+    
+    % If there are word notes -- there are none in some files 
+    if ~(isempty(gr(wrd_note_tier).INT));
+        
     content_words = {'blue','green','red', 'circle', 'triangle', 'star',...
         'qeed', 'qeet', 'cad', 'cat', 'kvee', 'yvee', 'sbot', 'hicep',...
         'back', 'big', 'down','filled', 'large', 'left', 'near', 'no',...
@@ -118,7 +127,7 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
     phrases = struct2table(gr(phr_comment_tier).INT);
     
     % Sanity check
-    if height(phrases) ~= length(unique(T.phr_id))-1; return; end;
+%    if height(phrases) ~= length(unique(T.phr_id))-1; return; end;
     
     for ph = 1:height(phrases);
         
@@ -142,6 +151,8 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
         end;
     end;
     
+    end; %if ~(isempty(gr(wrd_note_tier).INT));
+    
      %% Adding phrase_length column
      % Get list of unique phr_id
      phrs = unique(T.phr_id); phrs = phrs(phrs~=0);
@@ -160,5 +171,6 @@ function[T, wrd_id] = wrd_id_notes(filename, T,role, wrd_id)
         msgbox(['There is no notes tier:  ' filename 'rg'],'Error');
         display(['There is no word notes tier (5) in: ' filename]);
     end;  
+
 end
 
