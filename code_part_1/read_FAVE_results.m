@@ -29,6 +29,28 @@ file_path = ['/Users/amui/Dropbox/' e{1} ...
 
 files = dir([file_path output_type{1}]);
 
+
+    %% Timer to create time variables that resets for each day,
+    % each week, or through the whole experiment
+    
+    % Keys for all diccionaries
+    if e{1} == 'd'; 
+        keySet = {'A', 'K', 'M', 'S'};
+    else;           
+        keySet = {'E', 'M', 'A', 'B'}; end;
+    
+    % Timer diccionaries
+    valueSet = [0 0 0 0];
+    day_timer = containers.Map(keySet,valueSet);
+    week_timer = containers.Map(keySet,valueSet);
+    all_timer = containers.Map(keySet,valueSet);
+    
+    % Counter diccionaries
+    valueSet = [1 1 1 1];
+    day_counter = containers.Map(keySet,valueSet);
+    week_counter = containers.Map(keySet,valueSet);
+
+
     %% Main: loop over each output file as .csv and 
     % put the table in "results" struct 
     
@@ -100,6 +122,30 @@ files = dir([file_path output_type{1}]);
         'style','nFormants'}));
     T(:,indices_cols_remove) = [];
     
+    % Create day_timer column. Update day_timer and day_counter
+    % accordingly to the team
+    T.day_timer = T.t0 + day_timer(pla);
+    day_timer(pla) = day_timer(pla) + max(T.t1);
+    if day(1) > day_counter(pla); 
+        day_counter(pla) = day(1); 
+        day_timer(pla) = 0;
+    end;
+    % Create week_timer column, update week_timer counter.
+    T.week_timer = T.t0 + week_timer(pla);
+    week_timer(pla) = week_timer(pla) + max(T.t1);
+    if week(1) > week_counter(pla); 
+        week_counter(pla) = week(1);
+        week_timer(pla) = 0; 
+    end;
+    % Create all_timer column.
+    T.all_timer = T.t0 + all_timer(pla);
+    all_timer(pla) = all_timer(pla) + max(T.t1);
+    % All timer for day 5 exp 1 subject A, skip thay day for all_timer
+    if pla == 'A' & exp(1) == 1 & da == 6 & day_timer(pla) == 0;
+        T.all_timer = T.t0 + all_timer('K');
+        all_timer(pla) = all_timer(pla) + max(T.t1);
+    end;
+    
     % Add to master struct
     results(t_counter).table = T;
     results(t_counter).name = files(f).name;
@@ -139,7 +185,16 @@ if exp(1) == 1;
     ALL(~(ALL.player == 'A' & ALL.day == 5),:);
 end;
 
+% Adjust naming to avoid overlap of letter codes between subjects of exp 1
+% and exp 2 -- two A and two M originally used.
+if strcmp(e{1}, 'd2');
+    ALL.player(find(ALL.player == 'A')) = deal('N');
+    ALL.player(find(ALL.player == 'M')) = deal('G');
+end;
+
+%
 VOW = ALL(ALL.is_vowel == 1,:);
+
 %% Saving tables
 
 % Name table depending on whether it's files_norm or files_raw
