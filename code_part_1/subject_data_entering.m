@@ -13,6 +13,7 @@ for s=1:4;
     subjects(s).experiment = input('Experiment number 1 or 2 :');
     subjects(s).name = input('Enter full name: ');
     subjects(s).initial = input('Enter name initial: ');
+    subject(s).teammate = input('Enter initial of teammate: ');
     subjects(s).age = input('Age');
     subjects(s).native_language =  input('Native language: ');
     subjects(s).other_languages = input('Other languages you are fluent in');
@@ -37,6 +38,12 @@ for s=1:4;
 end; 
 
 subject_table = struct2table(subjects);
+
+%% Calculating score
+
+
+
+%% Saving
 
 e = subjects(1).experiment;
 if e==1; e = ''; else; e = str2num(e); end;

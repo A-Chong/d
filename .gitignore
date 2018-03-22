@@ -4,6 +4,7 @@
 # But not these files...
 !.gitignore
 !code_part_1
+!code_part_2
 !master.docx
 # etc...
 
