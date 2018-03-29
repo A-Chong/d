@@ -1,6 +1,5 @@
 %% Loads VOW_norm.mat from d/tables/ . and determines outliers. 
 % Creates is_outlier column with 0 for good data points and 1 for outliers. 
-% Saves VOW_norm.mat to d/tables/ .
 % Prints out summary of % of outliers by instance, with total of data and
 % amount on data that is outliers.
 %	
@@ -13,11 +12,10 @@
 
 
 %%
+function[VOW] = outliers(VOW)
+
 warning('off','all');
 
- for e = {'d', 'd2'}
-
-    load(['/Users/amui/Dropbox/' e{1} '/tables/Vow_norm.mat']);
     
     %% Syllable division
     VOW.syll = ones(height(VOW),1);
@@ -145,11 +143,4 @@ warning('off','all');
         '   Total outliers: ' num2str(outlier_counter) ...
         '   % as outliers: ' num2str(perc_outliers)]);
     
-    
-    %% Save updated table
-    save(['/Users/amui/Dropbox/' e{1} '/tables/VOW_norm.mat'], 'VOW');
-    writetable(VOW,['/Users/amui/Dropbox/' e{1} '/tables/VOW_norm.csv'],...
-    'Delimiter',','); 
-    
-    
- end;
+ end    
