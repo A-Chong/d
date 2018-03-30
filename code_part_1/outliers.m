@@ -23,7 +23,7 @@ warning('off','all');
     next_syll = 1;  % counter for syllable number
     for i = 1:height(VOW);
         if VOW.phn_id(i) == 1961;
-            true = true;
+            line_for_debugging = true;
         end;
         if ismember(VOW.word{i}, ...
             {'sbot' 'hicep' 'kvee' 'yvee' 'unfilled' 'triangle' 'circle'});

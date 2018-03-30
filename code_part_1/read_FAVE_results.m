@@ -130,26 +130,28 @@ files = dir([file_path output_type{1}]);
         day_counter(pla) = day(1); 
         day_timer(pla) = 0;
     end;
-    % Create week_timer column, update week_timer counter.
-    T.week_timer = T.t0 + week_timer(pla);
-    week_timer(pla) = week_timer(pla) + max(T.t1);
-    if week(1) > week_counter(pla); 
-        week_counter(pla) = week(1);
-        week_timer(pla) = 0; 
-    end;
-    % Create all_timer column.
-    T.all_timer = T.t0 + all_timer(pla);
-    all_timer(pla) = all_timer(pla) + max(T.t1);
-    % All timer for day 5 exp 1 subject A, skip thay day for all_timer
-    if pla == 'A' & exp(1) == 1 & da == 6 & day_timer(pla) == 0;
-        T.all_timer = T.t0 + all_timer('K');
-        all_timer(pla) = all_timer(pla) + max(T.t1);
-    end;
+%     % Create week_timer column, update week_timer counter.
+%     T.week_timer = T.t0 + week_timer(pla);
+%     week_timer(pla) = week_timer(pla) + max(T.t1);
+%     if week(1) > week_counter(pla); 
+%         week_counter(pla) = week(1);
+%         week_timer(pla) = 0; 
+%     end;
+%     % Create all_timer column.
+%     T.all_timer = T.t0 + all_timer(pla);
+%     all_timer(pla) = all_timer(pla) + max(T.t1);
+%     % All timer for day 5 exp 1 subject A, skip thay day for all_timer
+%     if pla == 'A' & exp(1) == 1 & da == 6 & day_timer(pla) == 0;
+%         T.all_timer = T.t0 + all_timer('K');
+%         all_timer(pla) = all_timer(pla) + max(T.t1);
+%     end;
     
     % Add to master struct
     results(t_counter).table = T;
     results(t_counter).name = files(f).name;
-    
+    results(t_counter).team = unique(T.team);
+    results(t_counter).player = unique(T.player);
+        
     % Update counter
     t_counter = t_counter + 1;
     
@@ -174,6 +176,10 @@ end;
     phn_id = linspace(1,height(ALL), height(ALL))';
     ALL = [table(phn_id) ALL];
     
+%% Create day_timer, week_timer, all_timer
+
+ALL = add_timers(ALL);
+
 %% VOW and ALL tables
 % In reality, the table so far contains "all" phones so it should be called 
 % 'ALL', and this is important as it becomes the reference table.
@@ -185,15 +191,21 @@ if exp(1) == 1;
     ALL(~(ALL.player == 'A' & ALL.day == 5),:);
 end;
 
-% Adjust naming to avoid overlap of letter codes between subjects of exp 1
-% and exp 2 -- two A and two M originally used.
-if strcmp(e{1}, 'd2');
-    ALL.player(find(ALL.player == 'A')) = deal('N');
-    ALL.player(find(ALL.player == 'M')) = deal('G');
-end;
+% % Adjust naming to avoid overlap of letter codes between subjects of exp 1
+% % and exp 2 -- two A and two M originally used.
+% if strcmp(e{1}, 'd2');
+%     ALL.player(find(ALL.player == 'A')) = deal('N');
+%     ALL.player(find(ALL.player == 'M')) = deal('G');
+% end;
 
 %
 VOW = ALL(ALL.is_vowel == 1,:);
+
+%% Create is_outlier column for _norm files
+
+if ~isempty(regexp(files(1).name,'norm', 'match'));
+    VOW = outliers(VOW);
+end;
 
 %% Saving tables
 
