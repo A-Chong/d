@@ -11,6 +11,8 @@ for e = {'d', 'd2'}
     load(['/Users/amui/Dropbox/' e{1} ...
         '/tables_generated_by_Sam/game_data.mat']);
     
+    G = game_absolute_time(GAME);
+    
 %% Process for both raw values and normalized
 for output_type = {'*.output_norm.txt', '*.output.txt'}
     
@@ -44,6 +46,7 @@ files = dir([file_path output_type{1}]);
     day_timer = containers.Map(keySet,valueSet);
     week_timer = containers.Map(keySet,valueSet);
     all_timer = containers.Map(keySet,valueSet);
+    team_day_timer = containers.Map({1,2,3,4},valueSet);
     
     % Counter diccionaries
     valueSet = [1 1 1 1];
