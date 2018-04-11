@@ -43,9 +43,9 @@ files = dir([file_path output_type{1}]);
     
     % Timer diccionaries
     valueSet = [0 0 0 0];
-    day_timer = containers.Map(keySet,valueSet);
-    week_timer = containers.Map(keySet,valueSet);
-    all_timer = containers.Map(keySet,valueSet);
+    spoken_day_timer = containers.Map(keySet,valueSet);
+    spoken_week_timer = containers.Map(keySet,valueSet);
+    spoken_all_timer = containers.Map(keySet,valueSet);
     team_day_timer = containers.Map({1,2,3,4},valueSet);
     
     % Counter diccionaries
@@ -125,29 +125,19 @@ files = dir([file_path output_type{1}]);
         'style','nFormants'}));
     T(:,indices_cols_remove) = [];
     
-    % Create day_timer column. Update day_timer and day_counter
+    % Create day_timer based on timestamp of games from G (from GAME)
+    T.day_timer = T.t0 + G.start_absolute_seconds(G.team == te & ...
+                                                    G.round == ro);
+    
+    % Create spoken_day_timer column. Update spoken_day_timer and day_counter
     % accordingly to the team
-    T.day_timer = T.t0 + day_timer(pla);
-    day_timer(pla) = day_timer(pla) + max(T.t1);
+    T.spoken_day_timer = T.t0 + spoken_day_timer(pla);
+    spoken_day_timer(pla) = spoken_day_timer(pla) + max(T.t1);
     if day(1) > day_counter(pla); 
         day_counter(pla) = day(1); 
-        day_timer(pla) = 0;
+        spoken_day_timer(pla) = 0;
     end;
-%     % Create week_timer column, update week_timer counter.
-%     T.week_timer = T.t0 + week_timer(pla);
-%     week_timer(pla) = week_timer(pla) + max(T.t1);
-%     if week(1) > week_counter(pla); 
-%         week_counter(pla) = week(1);
-%         week_timer(pla) = 0; 
-%     end;
-%     % Create all_timer column.
-%     T.all_timer = T.t0 + all_timer(pla);
-%     all_timer(pla) = all_timer(pla) + max(T.t1);
-%     % All timer for day 5 exp 1 subject A, skip thay day for all_timer
-%     if pla == 'A' & exp(1) == 1 & da == 6 & day_timer(pla) == 0;
-%         T.all_timer = T.t0 + all_timer('K');
-%         all_timer(pla) = all_timer(pla) + max(T.t1);
-%     end;
+
     
     % Add to master struct
     results(t_counter).table = T;
@@ -179,7 +169,8 @@ end;
     phn_id = linspace(1,height(ALL), height(ALL))';
     ALL = [table(phn_id) ALL];
     
-%% Create day_timer, week_timer, all_timer
+%% Create day_timer, week_timer, all_timer, ...
+% spoken_day_timer, spoken_week_timer, spoken_all_timer
 
 ALL = add_timers(ALL);
 
