@@ -13,9 +13,13 @@ tab.hour = tab.initial_trigger(:,4);
 tab.minute = tab.initial_trigger(:,5);
 tab.seconds = tab.initial_trigger(:,6);
 
-% Add 60 to those minutes that correspond to a larger hour.
+% Substract 30 from those minutes that correspond to the smaller hour,
+% and add 30 to those from the larger hour: 14:34-15:28 become 4-58 mins .
 hours = unique(tab.hour);
-tab.minute(tab.hour>hours(1)) = tab.minute(tab.hour>hours(1))+60;
+if length(hours) == 2;
+tab.minute(tab.hour==hours(1)) = tab.minute(tab.hour==hours(1))-30;
+tab.minute(tab.hour >hours(1)) = tab.minute(tab.hour >hours(1))+30;
+end;
 
 % For each row, substract minute(1) from the minute(i) to normalize it
 % multiply normalized minute by 60 and add seconds to take time to seconds
