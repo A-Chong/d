@@ -2,12 +2,32 @@
 
 function[ALL] = add_timers(ALL)
 
-% %% Time at the beggining of day 1 week 1, for explanation of game
-% % This has to be adjusted manually, since sometimes a team started at
-% % the o'clock, sometimes at the half hour.
-% if unique(ALL.exp) == 1;
-%     ALL.day_timer(ALL.team == 1 & ALL.day == 1)
-%     ALL.day_timer(ALL.team == 2 & ALL.day == 1)
+%% Make all day_timer go from 0 sec to 60 sec, since that measures the time
+% in interaction, regardless of timestamp
+for t=1:4;
+    days = unique(ALL.day(ALL.team == t));
+    
+    for d = min(days):max(days);
+        start = min(ALL.day_timer(ALL.day == d & ALL.team == t));
+        final = max(ALL.day_timer(ALL.day == d & ALL.team == t));
+        
+        if start <0 & final >60*60;
+            display(["team " num2str(t) " day " num2str(d) " is <0 and >60"]);
+        end;
+        
+        cushion = abs(0 - start);
+        
+        if start < 0;
+            ALL.day_timer(ALL.day == d & ALL.team == t) = ...
+                ALL.day_timer(ALL.day == d & ALL.team == t) + cushion;
+        else;
+            ALL.day_timer(ALL.day == d & ALL.team == t) = ...
+                ALL.day_timer(ALL.day == d & ALL.team == t) - cushion;            
+        end;
+        
+    end;
+end;
+
 
 
 %% Week counter
